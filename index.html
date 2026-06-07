@@ -1,0 +1,1651 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1480, initial-scale=0.25">
+<title>MailPilot · 邮件跟进 Agent 高保真原型</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", Arial, sans-serif;
+    background: #f3f4f8;
+    color: #1f2937;
+    padding: 32px 20px 60px;
+    line-height: 1.5;
+  }
+  .page-title {
+    max-width: 1320px; margin: 0 auto 32px;
+    display: flex; align-items: baseline; justify-content: space-between;
+  }
+  .page-title h1 { font-size: 22px; font-weight: 700; color: #111827;}
+  .page-title p { color: #6b7280; font-size: 13px;}
+  .frame-grid {
+    max-width: 1440px; margin: 0 auto;
+    display: grid; grid-template-columns: 1fr; gap: 48px;
+  }
+  .frame {
+    background: #fff; border-radius: 16px; overflow: hidden;
+    box-shadow: 0 20px 50px -20px rgba(17,24,39,0.25), 0 2px 6px rgba(17,24,39,0.05);
+    border: 1px solid #e5e7eb;
+  }
+  .frame-label {
+    background: #111827; color: #f9fafb; padding: 10px 20px;
+    font-size: 12px; letter-spacing: 0.5px; display: flex; gap: 10px; align-items: center;
+  }
+  .frame-label .dot { width:10px;height:10px;border-radius:50%;background:#ef4444;}
+  .frame-label .dot.y { background:#f59e0b;} .frame-label .dot.g { background:#10b981;}
+  .frame-label .name { margin-left: 14px; font-weight: 600;}
+  .frame-label .url { margin-left: auto; opacity:.6;}
+
+  /* App layout */
+  .app { display: grid; grid-template-columns: 220px 1fr; height: 760px; overflow:hidden;}
+  .sidebar {
+    background: #0f172a; color: #cbd5e1; padding: 22px 16px;
+    display: flex; flex-direction: column;
+  }
+  .logo {
+    display: flex; align-items: center; gap: 10px; padding: 0 8px 24px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+  .logo-mark {
+    width:34px;height:34px;border-radius:9px;
+    background: linear-gradient(135deg,#6366f1,#22d3ee);
+    display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;
+  }
+  .logo-text { color:#fff; font-weight:700; font-size:16px;}
+  .logo-text small { display:block; font-weight:400; font-size:11px; color:#94a3b8;}
+
+  .nav { margin-top: 18px; flex: 1;}
+  .nav-section { font-size: 11px; color:#64748b; padding: 12px 12px 6px; letter-spacing:.6px;}
+  .nav-item {
+    display:flex; align-items:center; gap:10px;
+    padding: 9px 12px; border-radius:8px; cursor:pointer;
+    font-size: 13.5px; color:#cbd5e1; margin-bottom:2px;
+  }
+  .nav-item .badge {
+    margin-left:auto; background:#ef4444; color:#fff;
+    font-size:11px; padding:1px 7px; border-radius:10px;
+  }
+  .nav-item.active { background:#1e293b; color:#fff;}
+  .nav-item:hover { background:#1e293b;}
+  .nav-icon { width:16px; text-align:center; opacity:.85;}
+
+  .sidebar-foot {
+    margin-top: auto; padding: 12px; border-top:1px solid rgba(255,255,255,0.06);
+    display:flex; align-items:center; gap:10px; font-size:12px;
+  }
+  .avatar { width:30px;height:30px;border-radius:50%;
+    background:linear-gradient(135deg,#f472b6,#fb7185); display:flex;align-items:center;
+    justify-content:center;color:#fff;font-size:12px;font-weight:600;}
+
+  /* Main */
+  .main { background: #f7f8fc; padding: 18px 24px 24px; overflow:auto; height:100%;}
+  .sidebar { overflow:auto; height:100%;}
+  .topbar {
+    display:flex; align-items:center; gap:16px; margin-bottom: 22px;
+  }
+  .topbar h2 { font-size:20px; color:#0f172a; font-weight:700; white-space:nowrap;}
+  .topbar .sub { color:#6b7280; font-size:13px; white-space:nowrap;}
+  .topbar .right { margin-left:auto; display:flex; gap:10px; align-items:center; flex-shrink:0;}
+  .pill {
+    background:#fff;border:1px solid #e5e7eb;border-radius:999px;
+    padding:6px 14px;font-size:12px;color:#374151;display:flex;gap:8px;align-items:center;
+    white-space:nowrap; flex-shrink:0;
+  }
+  .pill .led { width:8px;height:8px;border-radius:50%;background:#10b981;
+    box-shadow:0 0 0 3px rgba(16,185,129,0.18); flex-shrink:0;}
+  .btn {
+    background:#4f46e5;color:#fff;border:0;border-radius:8px;
+    padding:8px 14px;font-size:13px;font-weight:500;cursor:pointer;
+    white-space:nowrap; flex-shrink:0;
+  }
+  .btn.ghost { background:#fff; color:#374151; border:1px solid #e5e7eb;}
+
+  /* KPI cards */
+  .kpi-grid { display:grid; grid-template-columns: repeat(4, 1fr); gap:16px; margin-bottom:22px;}
+  .kpi {
+    background:#fff;border:1px solid #eef0f4; border-radius:14px;
+    padding:18px 18px 18px 18px; position:relative; overflow:hidden;
+    min-width:0;
+  }
+  .kpi .label { font-size:12.5px; color:#6b7280; display:flex; align-items:center; gap:6px;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis; padding-right:46px;}
+  .kpi .value { font-size:30px; font-weight:700; color:#0f172a; margin-top:8px;}
+  .kpi .trend { font-size:12px; margin-top:6px; white-space:nowrap;}
+  .kpi .trend.up { color:#059669;} .kpi .trend.warn{ color:#d97706;}
+  .kpi .ico {
+    position:absolute; top:16px; right:16px; width:36px; height:36px; border-radius:10px;
+    display:flex;align-items:center;justify-content:center; font-size:18px; flex-shrink:0;
+  }
+  .kpi.k1 .ico { background:#eef2ff;color:#4f46e5;}
+  .kpi.k2 .ico { background:#ecfeff;color:#0891b2;}
+  .kpi.k3 .ico { background:#ecfdf5;color:#059669;}
+  .kpi.k4 .ico { background:#fef2f2;color:#dc2626;}
+
+  /* Two column */
+  .two-col { display:grid; grid-template-columns: 1fr 360px; gap:18px;}
+  .card {
+    background:#fff;border:1px solid #eef0f4;border-radius:14px; overflow:hidden;
+  }
+  .card-head {
+    padding: 14px 18px; border-bottom:1px solid #f1f3f7;
+    display:flex; align-items:center; gap:10px;
+  }
+  .card-head h3 { font-size:14px; font-weight:600; color:#111827;}
+  .card-head .more { margin-left:auto; color:#6b7280; font-size:12px; cursor:pointer;}
+  .tabs { display:flex; gap:4px; margin-left:14px;}
+  .tab { font-size:12.5px; padding:5px 10px; border-radius:6px; color:#6b7280; cursor:pointer;}
+  .tab.active { background:#eef2ff; color:#4f46e5; font-weight:600;}
+
+  /* Email list */
+  .email-row {
+    display:grid; grid-template-columns: 32px 1fr 110px 110px;
+    gap: 12px; padding: 12px 18px; border-bottom:1px solid #f3f4f7;
+    align-items:center; cursor:pointer; font-size:13px;
+  }
+  .email-row:hover { background:#fafbff;}
+  .email-row .sender { font-weight:600; color:#111827;}
+  .email-row .preview { color:#6b7280; font-size:12.5px;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:2px;}
+  .tag {
+    font-size:11px; padding:3px 9px; border-radius:999px; font-weight:500;
+    display:inline-flex; align-items:center; gap:5px;
+  }
+  .tag.ai { background:#eef2ff; color:#4f46e5;}
+  .tag.meeting { background:#ecfdf5; color:#059669;}
+  .tag.human { background:#fef3c7; color:#b45309;}
+  .tag.new { background:#fef2f2; color:#dc2626;}
+  .tag.done { background:#f1f5f9; color:#475569;}
+  .who-pic { width:32px;height:32px;border-radius:50%;
+    background:#e0e7ff;color:#4f46e5;display:flex;align-items:center;justify-content:center;
+    font-size:12px; font-weight:600;}
+
+  /* Right panel: pipeline */
+  .pipeline { padding: 18px; }
+  .stage {
+    display:flex;align-items:center;gap:10px; padding:11px 0;
+    border-bottom:1px dashed #eef0f4;
+  }
+  .stage:last-child{ border-bottom:0;}
+  .stage .num { font-size:18px; font-weight:700; color:#0f172a;}
+  .stage .lbl { font-size:12.5px; color:#475569;}
+  .stage .bar {
+    margin-left:auto; width:90px; height:6px; background:#eef0f4; border-radius:3px; overflow:hidden;
+  }
+  .stage .bar i { display:block; height:100%; background:#4f46e5;}
+
+  /* Activity feed */
+  .activity { padding: 6px 18px 14px;}
+  .act-item { display:flex; gap:10px; padding:10px 0; border-bottom:1px dashed #f0f1f5; font-size:12.5px;}
+  .act-item:last-child{border-bottom:0;}
+  .act-dot { width:8px; height:8px; border-radius:50%; margin-top:7px; flex:none;}
+  .act-dot.b{background:#4f46e5;} .act-dot.g{background:#10b981;} .act-dot.o{background:#f59e0b;}
+  .act-item .time { color:#9ca3af; font-size:11px;}
+
+  /* Email detail */
+  .detail { display:grid; grid-template-columns: 290px 1fr 290px; height:100%;}
+  .col-list { border-right:1px solid #eef0f4; overflow:auto; position:relative;}
+  .col-thread { padding: 18px 22px; overflow:auto; position:relative;}
+  .col-side { border-left:1px solid #eef0f4; padding: 18px; background:#fafbfd; overflow:auto; position:relative;}
+  .col-header {
+    display:flex; align-items:center; justify-content:space-between;
+    padding: 12px 16px; border-bottom:1px solid #eef0f4;
+    background:#fafbfd; position:sticky; top:0; z-index:2;
+  }
+  .col-header .ttl { font-size:13px; font-weight:600; color:#0f172a;}
+  .collapse-btn {
+    width:24px;height:24px;border-radius:6px;border:1px solid #e5e7eb;
+    background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;
+    color:#6b7280; font-size:12px;
+  }
+  .collapse-btn:hover { background:#eef2ff; color:#4f46e5;}
+  .list-search {
+    padding: 14px 16px; border-bottom:1px solid #eef0f4;
+  }
+  .list-search input {
+    width:100%; padding:8px 12px; border:1px solid #e5e7eb; border-radius:8px;
+    font-size:13px; background:#f7f8fc;
+  }
+  .mini-row {
+    padding: 12px 16px; border-bottom:1px solid #f3f4f7; cursor:pointer;
+  }
+  .mini-row.active { background:#eef2ff;}
+  .mini-row .top { display:flex; justify-content:space-between; font-size:12.5px; color:#9ca3af;}
+  .mini-row .sender { font-size:13.5px; color:#111827; font-weight:600; margin-top:2px;}
+  .mini-row .sub { font-size:12.5px; color:#475569; margin-top:2px;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .mini-row .tags { margin-top:6px;}
+
+  .thread-head {
+    display:flex; gap:12px; align-items:center; padding-bottom:14px;
+    border-bottom:1px solid #eef0f4; flex-wrap:wrap;
+  }
+  .thread-head h3 { font-size:17px; color:#0f172a; font-weight:700; white-space:nowrap;}
+  .thread-head .meta { color:#6b7280; font-size:12.5px; margin-top:4px; white-space:nowrap;
+    overflow:hidden; text-overflow:ellipsis;}
+  .thread-head .who-info { min-width:0; flex:1;}
+  .thread-actions { margin-left:auto; display:flex; gap:8px; flex-shrink:0; flex-wrap:nowrap;}
+  .thread-actions .toggle, .thread-actions .btn { white-space:nowrap;}
+
+  .msg { display:flex; gap:12px; padding:18px 0; border-bottom:1px solid #f3f4f7;}
+  .msg .body {
+    flex:1; background:#fff; border:1px solid #eef0f4; border-radius:10px; padding:14px 16px;
+    font-size:13.5px; color:#374151;
+  }
+  .msg.ai .body { background:#f5f7ff; border-color:#dfe3ff;}
+  .msg .head { display:flex; align-items:center; gap:8px; font-size:12.5px; margin-bottom:6px;}
+  .msg .head .who { font-weight:600; color:#111827;}
+  .msg .head .time { color:#9ca3af; font-size:11.5px; margin-left:auto;}
+
+  .ai-banner {
+    background: linear-gradient(135deg,#eef2ff,#ecfeff);
+    border:1px solid #dfe3ff; border-radius:12px;
+    padding: 14px 16px; margin: 18px 0; font-size:13px; color:#3730a3;
+    display:flex; gap:12px; align-items:flex-start;
+  }
+  .ai-banner b { color:#1e1b4b;}
+
+  /* Draft reply box */
+  .draft {
+    margin-top:18px; border:1px dashed #c7d2fe; border-radius:12px;
+    background:#fafbff;
+  }
+  .draft-head {
+    padding: 10px 14px; display:flex; align-items:center; gap:10px;
+    background:#eef2ff; border-radius:11px 11px 0 0; font-size:12.5px; color:#3730a3;
+  }
+  .draft-body { padding: 14px; font-size:13.5px; color:#374151;}
+  .draft-foot { padding: 10px 14px; border-top:1px solid #e0e7ff;
+    display:flex; gap:8px; align-items:center;}
+  .countdown { color:#dc2626; font-weight:600; font-size:12.5px;}
+  .countdown.ok { color:#059669;}
+
+  /* Side panel content */
+  .side-block { margin-bottom: 20px;}
+  .side-block .t { font-size:11.5px; color:#6b7280; letter-spacing:.5px; margin-bottom:8px; text-transform:uppercase;}
+  .cust-card {
+    background:#fff;border:1px solid #eef0f4;border-radius:10px; padding:14px;
+  }
+  .cust-card .name { font-weight:600; color:#0f172a;}
+  .cust-card .row { display:flex; justify-content:space-between; font-size:12.5px;
+    color:#6b7280; padding:5px 0;}
+  .cust-card .row b { color:#0f172a; font-weight:500;}
+  .keyword { display:inline-block; font-size:11.5px; background:#eef2ff;
+    color:#4338ca; padding:3px 9px; border-radius:999px; margin:2px 4px 2px 0;}
+  .timeline { font-size:12.5px;}
+  .timeline .ti { padding:8px 0; border-bottom:1px dashed #f0f1f5;}
+  .timeline .ti:last-child{border-bottom:0;}
+  .timeline .when { color:#9ca3af; font-size:11.5px;}
+  .toggle { display:flex; align-items:center; gap:8px; background:#fff;
+    border:1px solid #e5e7eb; border-radius:10px; padding:10px 12px; font-size:13px;}
+  .switch { width:34px; height:20px; background:#10b981; border-radius:99px; position:relative;}
+  .switch::after { content:""; position:absolute; right:2px; top:2px;
+    width:16px;height:16px;background:#fff;border-radius:50%;}
+  .switch.off { background:#cbd5e1;}
+  .switch.off::after { right:auto; left:2px;}
+
+  /* Calendar */
+  .calendar { padding: 18px;}
+  .cal-head {
+    display:flex; align-items:center; gap:12px; margin-bottom:14px;
+  }
+  .cal-head h3 { font-size:18px; color:#0f172a;}
+  .cal-nav { display:flex; gap:4px; margin-left:auto;}
+  .cal-nav button { background:#fff; border:1px solid #e5e7eb; padding:6px 12px;
+    font-size:12.5px; border-radius:8px; cursor:pointer;}
+  .cal-nav button.active{ background:#4f46e5; color:#fff; border-color:#4f46e5;}
+
+  .week-grid {
+    display:grid; grid-template-columns: 64px repeat(7, 1fr);
+    border:1px solid #eef0f4; border-radius:12px; overflow:hidden;
+    background:#fff;
+  }
+  .wg-head { background:#fafbfd; padding:10px 6px; text-align:center;
+    font-size:12px; color:#6b7280; border-bottom:1px solid #eef0f4;
+    border-right:1px solid #f3f4f7;
+  }
+  .wg-head b { display:block; color:#111827; font-size:14px; margin-top:2px;}
+  .wg-head.today b { color:#4f46e5;}
+  .wg-time { padding:10px 6px; font-size:11.5px; color:#9ca3af; text-align:right;
+    border-bottom:1px solid #f3f4f7; border-right:1px solid #f3f4f7; background:#fafbfd;}
+  .wg-cell {
+    border-right:1px solid #f3f4f7; border-bottom:1px solid #f3f4f7;
+    min-height:54px; position:relative; padding:3px;
+  }
+  .wg-cell:last-child{border-right:0;}
+  .ev {
+    background:#eef2ff; color:#3730a3; border-left:3px solid #4f46e5;
+    border-radius:6px; padding:5px 7px; font-size:11.5px; font-weight:600;
+    cursor:pointer; margin-bottom:3px;
+  }
+  .ev small { display:block; font-weight:400; color:#4338ca; font-size:10.5px;}
+  .ev.green { background:#ecfdf5; color:#065f46; border-left-color:#10b981;}
+  .ev.green small{ color:#047857;}
+  .ev.amber { background:#fffbeb; color:#92400e; border-left-color:#f59e0b;}
+  .ev.amber small{ color:#b45309;}
+  .ev.pink  { background:#fdf2f8; color:#9d174d; border-left-color:#ec4899;}
+  .ev.pink small{ color:#be185d;}
+
+  /* Meeting detail modal-ish */
+  .meeting-detail {
+    margin-top: 20px; display:grid; grid-template-columns: 1.4fr 1fr; gap:16px;
+  }
+  .md-card { background:#fff; border:1px solid #eef0f4; border-radius:12px; padding:18px;}
+  .md-card h4 { font-size:14px; color:#0f172a; margin-bottom:10px;
+    display:flex; align-items:center; gap:8px;}
+  .md-card .field { display:flex; gap:10px; padding:7px 0; font-size:13px; color:#475569;}
+  .md-card .field b { color:#0f172a; min-width: 90px; font-weight:500;}
+  .focus-list .fl-item {
+    background:#f7f8fc; border-radius:8px; padding:10px 12px;
+    margin-bottom:8px; font-size:12.5px; color:#374151;
+  }
+  .focus-list .fl-item b { color:#4f46e5;}
+
+  /* Setup wizard */
+  .setup { padding: 36px 48px; }
+  .setup-head { text-align:center; margin-bottom:28px;}
+  .setup-head h2 { font-size:24px; color:#0f172a; font-weight:700;}
+  .setup-head p { color:#6b7280; margin-top:6px; font-size:13.5px;}
+  .steps { display:flex; justify-content:center; gap:8px; margin-bottom:30px;}
+  .step {
+    display:flex; align-items:center; gap:8px; font-size:12.5px; color:#6b7280;
+  }
+  .step .num { width:24px;height:24px;border-radius:50%; background:#e5e7eb;
+    color:#6b7280; display:flex; align-items:center; justify-content:center;
+    font-weight:600; font-size:12px;}
+  .step.done .num { background:#10b981; color:#fff;}
+  .step.active .num { background:#4f46e5; color:#fff;}
+  .step.active span { color:#111827; font-weight:600;}
+  .step-line { width:36px; height:1px; background:#e5e7eb; margin-top:12px;}
+
+  .setup-grid { display:grid; grid-template-columns: 1fr 1fr; gap: 22px;
+    max-width: 880px; margin: 0 auto;}
+  .form-card {
+    background:#fff;border:1px solid #eef0f4;border-radius:14px; padding:22px;
+  }
+  .form-card h4 { font-size:14px; color:#0f172a; margin-bottom:14px;
+    display:flex; gap:8px; align-items:center;}
+  .form-row { margin-bottom: 14px;}
+  .form-row label { display:block; font-size:12.5px; color:#374151; margin-bottom:6px; font-weight:500;}
+  .form-row input, .form-row textarea, .form-row select {
+    width:100%; padding:10px 12px; border:1px solid #e5e7eb; border-radius:8px;
+    font-size:13px; background:#fafbfd; font-family:inherit;
+  }
+  .form-row textarea{ min-height:80px; resize:vertical;}
+  .uploader {
+    border:2px dashed #c7d2fe; background:#fafbff; border-radius:10px;
+    padding:22px; text-align:center; font-size:13px; color:#4f46e5; cursor:pointer;
+  }
+  .uploader small { display:block; color:#6b7280; margin-top:4px; font-size:11.5px;}
+  .gmail-btn {
+    width:100%; padding:11px; border:1px solid #e5e7eb; background:#fff;
+    border-radius:8px; display:flex; align-items:center; justify-content:center; gap:10px;
+    font-size:13.5px; font-weight:500; cursor:pointer; color:#374151;
+  }
+  .gmail-btn.connected { background:#ecfdf5; border-color:#a7f3d0; color:#065f46;}
+  .checkbox-row { display:flex; gap:8px; align-items:center; font-size:12.5px;
+    color:#475569; margin-top:8px;}
+
+  .setup-foot {
+    max-width:880px; margin: 28px auto 0; display:flex; justify-content:space-between;
+  }
+
+  /* Legend */
+  .legend {
+    max-width:1320px; margin: 18px auto 0; font-size:12px; color:#6b7280;
+    text-align:center;
+  }
+</style>
+</head>
+<body>
+
+<div class="page-title">
+  <div>
+    <h1>MailPilot · Facebook 广告表单跟进 Agent</h1>
+    <p>高保真原型 · 6 个核心界面 · 销售自动化邮件回复 + Google Meet 预约</p>
+  </div>
+  <div class="pill"><span class="led"></span> Prototype v1.0 · 2026-06-07</div>
+</div>
+
+<div class="frame-grid">
+
+<!-- ============ FRAME 1: DASHBOARD ============ -->
+<div class="frame">
+  <div class="frame-label">
+    <span class="dot"></span><span class="dot y"></span><span class="dot g"></span>
+    <span class="name">界面 1 · 首页概览（Dashboard）</span>
+    <span class="url">mailpilot.ai/dashboard</span>
+  </div>
+  <div class="app">
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="logo">
+        <div class="logo-mark">M</div>
+        <div class="logo-text">MailPilot
+          <small>Lead Follow-up Agent</small>
+        </div>
+      </div>
+      <div class="nav">
+        <div class="nav-section">主导航</div>
+        <div class="nav-item active"><span class="nav-icon">◐</span>概览</div>
+        <div class="nav-item"><span class="nav-icon">✉</span>邮件队列<span class="badge">12</span></div>
+        <div class="nav-item"><span class="nav-icon">▤</span>会议日历</div>
+        <div class="nav-item"><span class="nav-icon">⚑</span>待人工接管<span class="badge">3</span></div>
+        <div class="nav-item"><span class="nav-icon">◇</span>客户档案</div>
+        <div class="nav-section">配置</div>
+        <div class="nav-item"><span class="nav-icon">⚙</span>账户与话术</div>
+        <div class="nav-item"><span class="nav-icon">⌬</span>Agent 行为</div>
+      </div>
+      <div class="sidebar-foot">
+        <div class="avatar">EW</div>
+        <div>
+          <div style="color:#fff;font-weight:600;">Even Wu</div>
+          <div style="color:#94a3b8;">sales@acme.io</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main -->
+    <div class="main">
+      <div class="topbar">
+        <div>
+          <h2>👋 早上好，Even</h2>
+          <div class="sub">过去 24 小时 Agent 自动处理了 38 封邮件 · 平均响应时间 2 分 14 秒</div>
+        </div>
+        <div class="right">
+          <button class="btn">+ 新建跟进任务</button>
+        </div>
+      </div>
+
+      <!-- KPI -->
+      <div class="kpi-grid">
+        <div class="kpi k1">
+          <div class="ico">✉</div>
+          <div class="label">新邮件 · 待 Agent 处理</div>
+          <div class="value">12</div>
+          <div class="trend up">↑ 较昨日 +4</div>
+        </div>
+        <div class="kpi k2">
+          <div class="ico">⟳</div>
+          <div class="label">AI 正在跟进中</div>
+          <div class="value">28</div>
+          <div class="trend up">↑ 7 封今日新增对话</div>
+        </div>
+        <div class="kpi k3">
+          <div class="ico">✓</div>
+          <div class="label">已成功约到 Meeting</div>
+          <div class="value">9</div>
+          <div class="trend up">本周转化率 18.4%</div>
+        </div>
+        <div class="kpi k4">
+          <div class="ico">⚑</div>
+          <div class="label">待人工接管</div>
+          <div class="value">3</div>
+          <div class="trend warn">⚠ 最久等待 1h 22m</div>
+        </div>
+      </div>
+
+      <!-- Two col -->
+      <div class="two-col">
+        <!-- Left: email list -->
+        <div class="card">
+          <div class="card-head">
+            <h3>📥 最新邮件流</h3>
+            <div class="tabs">
+              <div class="tab active">全部</div>
+              <div class="tab">AI 跟进中</div>
+              <div class="tab">需人工</div>
+              <div class="tab">已约会</div>
+            </div>
+            <div class="more">查看全部 →</div>
+          </div>
+
+          <div class="email-row">
+            <div class="who-pic">SJ</div>
+            <div>
+              <div class="sender">Sarah Johnson · TechCorp Inc.</div>
+              <div class="preview">Hi, I saw your ad on Facebook about the SaaS automation tool…</div>
+            </div>
+            <div><span class="tag new">● 新邮件</span></div>
+            <div style="color:#6b7280;font-size:12px;">2 分钟前</div>
+          </div>
+
+          <div class="email-row">
+            <div class="who-pic" style="background:#fef3c7;color:#b45309;">MR</div>
+            <div>
+              <div class="sender">Marcus Reed · BlueOcean Logistics</div>
+              <div class="preview">Thanks for the info. Could we schedule a call next Tuesday around…</div>
+            </div>
+            <div><span class="tag ai">⟳ AI 跟进</span></div>
+            <div style="color:#6b7280;font-size:12px;">8 分钟前</div>
+          </div>
+
+          <div class="email-row">
+            <div class="who-pic" style="background:#ecfdf5;color:#059669;">EL</div>
+            <div>
+              <div class="sender">Emma Lopez · Bright Studio</div>
+              <div class="preview">Great, June 10th at 3 PM PT works for me. Looking forward to it!</div>
+            </div>
+            <div><span class="tag meeting">✓ 已约会</span></div>
+            <div style="color:#6b7280;font-size:12px;">22 分钟前</div>
+          </div>
+
+          <div class="email-row">
+            <div class="who-pic" style="background:#fef2f2;color:#dc2626;">DK</div>
+            <div>
+              <div class="sender">David Kim · NovaPay</div>
+              <div class="preview">Actually, we need an enterprise SLA with on-prem deployment, can…</div>
+            </div>
+            <div><span class="tag human">⚑ 待人工</span></div>
+            <div style="color:#dc2626;font-size:12px;">1h 22m</div>
+          </div>
+
+          <div class="email-row">
+            <div class="who-pic">AC</div>
+            <div>
+              <div class="sender">Alex Chen · Pixel Labs</div>
+              <div class="preview">Sounds interesting. Can you send pricing for a 50-seat team?</div>
+            </div>
+            <div><span class="tag ai">⟳ AI 跟进</span></div>
+            <div style="color:#6b7280;font-size:12px;">2h</div>
+          </div>
+
+          <div class="email-row">
+            <div class="who-pic" style="background:#ecfdf5;color:#059669;">JT</div>
+            <div>
+              <div class="sender">Jenna Taylor · Loom Retail</div>
+              <div class="preview">Confirmed for June 9, 10:00 AM. I added my CTO to the invite.</div>
+            </div>
+            <div><span class="tag meeting">✓ 已约会</span></div>
+            <div style="color:#6b7280;font-size:12px;">3h</div>
+          </div>
+
+          <div class="email-row">
+            <div class="who-pic">PB</div>
+            <div>
+              <div class="sender">Priya Banerjee · Hyperion AI</div>
+              <div class="preview">Just filled the form. Curious about integration with HubSpot…</div>
+            </div>
+            <div><span class="tag done">已回复</span></div>
+            <div style="color:#6b7280;font-size:12px;">昨天</div>
+          </div>
+        </div>
+
+        <!-- Right column -->
+        <div>
+          <div class="card" style="margin-bottom:16px;">
+            <div class="card-head"><h3>🚦 跟进漏斗（本周）</h3></div>
+            <div class="pipeline">
+              <div class="stage">
+                <div class="num">52</div>
+                <div class="lbl">FB 表单进入</div>
+                <div class="bar"><i style="width:100%"></i></div>
+              </div>
+              <div class="stage">
+                <div class="num">47</div>
+                <div class="lbl">AI 首封回复</div>
+                <div class="bar"><i style="width:90%;background:#6366f1"></i></div>
+              </div>
+              <div class="stage">
+                <div class="num">28</div>
+                <div class="lbl">客户有回应</div>
+                <div class="bar"><i style="width:54%;background:#0891b2"></i></div>
+              </div>
+              <div class="stage">
+                <div class="num">9</div>
+                <div class="lbl">成功约到 Meet</div>
+                <div class="bar"><i style="width:17%;background:#10b981"></i></div>
+              </div>
+              <div class="stage">
+                <div class="num">3</div>
+                <div class="lbl">转人工</div>
+                <div class="bar"><i style="width:6%;background:#f59e0b"></i></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-head"><h3>⚡ Agent 实时活动</h3></div>
+            <div class="activity">
+              <div class="act-item">
+                <div class="act-dot g"></div>
+                <div>
+                  <div><b>Emma Lopez</b> 确认了 6月10日 15:00 的会议</div>
+                  <div class="time">Agent · 22 分钟前</div>
+                </div>
+              </div>
+              <div class="act-item">
+                <div class="act-dot b"></div>
+                <div>
+                  <div>向 <b>Sarah Johnson</b> 发送了第 1 封跟进邮件</div>
+                  <div class="time">Agent · 35 分钟前</div>
+                </div>
+              </div>
+              <div class="act-item">
+                <div class="act-dot o"></div>
+                <div>
+                  <div><b>David Kim</b> 提到企业 SLA，已转人工</div>
+                  <div class="time">Agent · 1h 22m 前</div>
+                </div>
+              </div>
+              <div class="act-item">
+                <div class="act-dot b"></div>
+                <div>
+                  <div>为 <b>Alex Chen</b> 自动选择了 Pricing 话术模板</div>
+                  <div class="time">Agent · 2h 前</div>
+                </div>
+              </div>
+              <div class="act-item">
+                <div class="act-dot g"></div>
+                <div>
+                  <div>同步了 Google Calendar 空闲时段（6/9 - 6/13）</div>
+                  <div class="time">系统 · 今早 09:00</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+
+<!-- ============ FRAME 2: EMAIL DETAIL ============ -->
+<div class="frame">
+  <div class="frame-label">
+    <span class="dot"></span><span class="dot y"></span><span class="dot g"></span>
+    <span class="name">界面 2 · 邮件队列 + 对话详情（含 AI 草稿 / 转人工切换）</span>
+    <span class="url">mailpilot.ai/inbox/thread/9f2c</span>
+  </div>
+  <div class="app">
+    <div class="sidebar">
+      <div class="logo">
+        <div class="logo-mark">M</div>
+        <div class="logo-text">MailPilot<small>Lead Follow-up Agent</small></div>
+      </div>
+      <div class="nav">
+        <div class="nav-section">主导航</div>
+        <div class="nav-item"><span class="nav-icon">◐</span>概览</div>
+        <div class="nav-item active"><span class="nav-icon">✉</span>邮件队列<span class="badge">12</span></div>
+        <div class="nav-item"><span class="nav-icon">▤</span>会议日历</div>
+        <div class="nav-item"><span class="nav-icon">⚑</span>待人工接管<span class="badge">3</span></div>
+        <div class="nav-item"><span class="nav-icon">◇</span>客户档案</div>
+        <div class="nav-section">配置</div>
+        <div class="nav-item"><span class="nav-icon">⚙</span>账户与话术</div>
+        <div class="nav-item"><span class="nav-icon">⌬</span>Agent 行为</div>
+      </div>
+      <div class="sidebar-foot">
+        <div class="avatar">EW</div>
+        <div>
+          <div style="color:#fff;font-weight:600;">Even Wu</div>
+          <div style="color:#94a3b8;">sales@acme.io</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="main" style="padding:0;background:#fff;">
+      <div class="detail">
+
+        <!-- 左：邮件列表 -->
+        <div class="col-list">
+          <div class="col-header">
+            <div class="ttl">📥 邮件队列（37）</div>
+            <button class="collapse-btn" title="收起列表">«</button>
+          </div>
+          <div class="list-search">
+            <input placeholder="🔍 搜索发件人 / 关键字" />
+          </div>
+
+          <div class="mini-row">
+            <div class="top"><span>● 新邮件</span><span>2m</span></div>
+            <div class="sender">Sarah Johnson</div>
+            <div class="sub">Hi, I saw your ad on Facebook…</div>
+            <div class="tags"><span class="tag new">新</span></div>
+          </div>
+
+          <div class="mini-row active">
+            <div class="top"><span style="color:#4f46e5;">AI 跟进中 · 3 轮</span><span>8m</span></div>
+            <div class="sender">Marcus Reed</div>
+            <div class="sub">Thanks for the info. Could we schedule…</div>
+            <div class="tags">
+              <span class="tag ai">AI</span>
+              <span class="tag" style="background:#fef3c7;color:#b45309;">待发送</span>
+            </div>
+          </div>
+
+          <div class="mini-row">
+            <div class="top"><span style="color:#059669;">✓ 已约会</span><span>22m</span></div>
+            <div class="sender">Emma Lopez</div>
+            <div class="sub">Great, June 10th at 3 PM PT works…</div>
+            <div class="tags"><span class="tag meeting">Meeting</span></div>
+          </div>
+
+          <div class="mini-row">
+            <div class="top"><span style="color:#dc2626;">⚑ 待人工</span><span>1h</span></div>
+            <div class="sender">David Kim</div>
+            <div class="sub">we need an enterprise SLA with on-prem…</div>
+            <div class="tags"><span class="tag human">人工</span></div>
+          </div>
+
+          <div class="mini-row">
+            <div class="top"><span style="color:#4f46e5;">AI 跟进中</span><span>2h</span></div>
+            <div class="sender">Alex Chen</div>
+            <div class="sub">Sounds interesting. Can you send pricing…</div>
+            <div class="tags"><span class="tag ai">AI</span></div>
+          </div>
+
+          <div class="mini-row">
+            <div class="top"><span>已完成</span><span>昨日</span></div>
+            <div class="sender">Priya Banerjee</div>
+            <div class="sub">Just filled the form. Curious about HubSpot…</div>
+            <div class="tags"><span class="tag done">已回复</span></div>
+          </div>
+        </div>
+
+        <!-- 中：对话 -->
+        <div class="col-thread">
+          <div class="thread-head">
+            <div class="who-pic" style="width:42px;height:42px;font-size:15px;background:#fef3c7;color:#b45309;flex-shrink:0;">MR</div>
+            <div class="who-info">
+              <h3>Marcus Reed · BlueOcean Logistics</h3>
+              <div class="meta">marcus.reed@blueocean.com · FB Ads「2026 Summer Promo」</div>
+            </div>
+            <div class="thread-actions">
+              <div class="toggle">
+                AI 接管 <div class="switch"></div>
+              </div>
+              <button class="btn ghost">⚑ 转人工</button>
+              <button class="btn">客户档案</button>
+            </div>
+          </div>
+
+          <!-- 客户首封 -->
+          <div class="msg">
+            <div class="who-pic" style="background:#fef3c7;color:#b45309;">MR</div>
+            <div class="body">
+              <div class="head"><span class="who">Marcus Reed</span>
+                <span class="time">今天 09:12</span></div>
+              <div>
+                Hi team,<br><br>
+                I saw your ad about workflow automation for logistics companies.
+                We're a mid-sized 3PL with ~120 employees. Could you share more
+                about pricing and integration with NetSuite? Also happy to jump
+                on a quick call next Tuesday around 2 PM PT.
+              </div>
+            </div>
+          </div>
+
+          <!-- AI 第一次回复 -->
+          <div class="msg ai">
+            <div class="who-pic" style="background:#4f46e5;color:#fff;">AI</div>
+            <div class="body">
+              <div class="head"><span class="who">MailPilot Agent</span>
+                <span class="tag ai" style="margin-left:6px;">自动发送</span>
+                <span class="time">今天 09:14</span></div>
+              <div>
+                Hi Marcus,<br><br>
+                Thanks for reaching out! Acme automates lead-routing and order
+                visibility for 3PLs like BlueOcean — we have a native NetSuite
+                connector and a $1.2 / order pricing tier that fits a 120-person
+                team well.<br><br>
+                For Tuesday 2 PM PT, our solutions lead Even Wu is available.
+                Would <b>Tue Jun 9, 14:00 – 14:30 PT</b> work? I'll send a Google
+                Meet invite as soon as you confirm.<br><br>
+                Best, Even (via MailPilot)
+              </div>
+            </div>
+          </div>
+
+          <!-- 客户回复 -->
+          <div class="msg">
+            <div class="who-pic" style="background:#fef3c7;color:#b45309;">MR</div>
+            <div class="body">
+              <div class="head"><span class="who">Marcus Reed</span>
+                <span class="time">今天 10:48</span></div>
+              <div>
+                Tuesday works. Can you also send a one-pager I can share with
+                our COO before the call? And is there a way to demo the NetSuite
+                sync live?
+              </div>
+            </div>
+          </div>
+
+          <!-- AI 分析提示 -->
+          <div class="ai-banner">
+            <div style="font-size:18px;">🧠</div>
+            <div>
+              <b>Agent 分析：</b>客户对 <b>NetSuite 集成</b> 表现出明确兴趣，且要求一份 one-pager。
+              已匹配话术手册「<b>3PL Pricing & Integration v2</b>」，并准备附带
+              <b>NetSuite-Acme-Onepager.pdf</b>。检测到时间已落定，将在草稿中加入
+              Google Meet 链接。
+            </div>
+          </div>
+
+          <!-- AI 草稿 -->
+          <div class="draft">
+            <div class="draft-head">
+              ✦ AI 待发送草稿 · 60s 后自动发送 ·
+              <span class="countdown">00:42</span>
+              <span style="margin-left:auto;">模板：3PL Pricing & Integration v2</span>
+            </div>
+            <div class="draft-body">
+              Hi Marcus,<br><br>
+              Great — locking in <b>Tue Jun 9, 14:00 – 14:30 PT</b>. Google Meet
+              invite is on its way to your inbox 📅<br><br>
+              Attaching the one-pager you can forward to your COO, plus a 90-second
+              clip of our live NetSuite sync. Happy to walk the COO through it on
+              the call too.<br><br>
+              <span style="color:#4f46e5;">[ 附件：NetSuite-Acme-Onepager.pdf · netsuite-demo-clip.mp4 ]</span><br><br>
+              Talk Tuesday!<br>Even
+            </div>
+            <div class="draft-foot">
+              <button class="btn">✓ 立即发送</button>
+              <button class="btn ghost">✎ 编辑草稿</button>
+              <button class="btn ghost">↻ 重新生成</button>
+              <button class="btn ghost" style="color:#dc2626;">⚑ 转人工接管</button>
+              <span style="margin-left:auto;color:#6b7280;font-size:12px;">
+                选择"编辑"或"转人工"将自动暂停倒计时
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 右：客户档案 -->
+        <div class="col-side" style="padding:0;">
+          <div class="col-header">
+            <div class="ttl">◇ 客户档案</div>
+            <button class="collapse-btn" title="收起档案">»</button>
+          </div>
+          <div style="padding:16px;">
+          <div class="side-block">
+            <div class="t">基本信息</div>
+            <div class="cust-card">
+              <div class="name">Marcus Reed</div>
+              <div style="color:#6b7280;font-size:12.5px;margin-top:2px;">Operations Director · BlueOcean Logistics</div>
+              <div style="margin-top:10px;border-top:1px solid #eef0f4;padding-top:8px;">
+                <div class="row"><span>公司规模</span><b>120 员工</b></div>
+                <div class="row"><span>所在地</span><b>San Diego, US</b></div>
+                <div class="row"><span>表单来源</span><b>FB Ad · Summer 2026</b></div>
+                <div class="row"><span>沟通轮次</span><b>3 轮 · 2 天</b></div>
+                <div class="row"><span>意向评分</span><b style="color:#059669;">●●●●○ 高</b></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="side-block">
+            <div class="t">关注点（AI 提取）</div>
+            <div>
+              <span class="keyword">NetSuite 集成</span>
+              <span class="keyword">定价</span>
+              <span class="keyword">3PL 行业</span>
+              <span class="keyword">需要 one-pager</span>
+              <span class="keyword">向 COO 汇报</span>
+            </div>
+          </div>
+
+          <div class="side-block">
+            <div class="t">话术匹配</div>
+            <div style="background:#fff;border:1px solid #eef0f4;border-radius:10px;padding:12px;font-size:12.5px;">
+              <div style="font-weight:600;color:#0f172a;">3PL Pricing & Integration v2</div>
+              <div style="color:#6b7280;margin-top:4px;">命中关键词 5/7 · 历史成功率 64%</div>
+            </div>
+          </div>
+
+          <div class="side-block">
+            <div class="t">沟通时间线</div>
+            <div class="timeline">
+              <div class="ti">
+                <div>客户首封提问</div>
+                <div class="when">今 09:12 · 客户</div>
+              </div>
+              <div class="ti">
+                <div>AI 发送首封回复 + 提议会议</div>
+                <div class="when">今 09:14 · Agent</div>
+              </div>
+              <div class="ti">
+                <div>客户确认时间 + 追问</div>
+                <div class="when">今 10:48 · 客户</div>
+              </div>
+              <div class="ti" style="color:#4f46e5;">
+                <div><b>草稿待发送：发送日程 + 一页 PDF</b></div>
+                <div class="when">现在 · Agent</div>
+              </div>
+            </div>
+          </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ FRAME 3 (NEW): HUMAN TAKEOVER QUEUE ============ -->
+<div class="frame">
+  <div class="frame-label">
+    <span class="dot"></span><span class="dot y"></span><span class="dot g"></span>
+    <span class="name">界面 3 · 待人工接管</span>
+    <span class="url">mailpilot.ai/handover</span>
+  </div>
+  <div class="app">
+    <div class="sidebar">
+      <div class="logo">
+        <div class="logo-mark">M</div>
+        <div class="logo-text">MailPilot<small>Lead Follow-up Agent</small></div>
+      </div>
+      <div class="nav">
+        <div class="nav-section">主导航</div>
+        <div class="nav-item"><span class="nav-icon">◐</span>概览</div>
+        <div class="nav-item"><span class="nav-icon">✉</span>邮件队列<span class="badge">12</span></div>
+        <div class="nav-item"><span class="nav-icon">▤</span>会议日历</div>
+        <div class="nav-item active"><span class="nav-icon">⚑</span>待人工接管<span class="badge">3</span></div>
+        <div class="nav-item"><span class="nav-icon">◇</span>客户档案</div>
+        <div class="nav-section">配置</div>
+        <div class="nav-item"><span class="nav-icon">⚙</span>账户与话术</div>
+        <div class="nav-item"><span class="nav-icon">⌬</span>Agent 行为</div>
+      </div>
+      <div class="sidebar-foot">
+        <div class="avatar">EW</div>
+        <div>
+          <div style="color:#fff;font-weight:600;">Even Wu</div>
+          <div style="color:#94a3b8;">sales@acme.io</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="main">
+      <div class="topbar">
+        <div>
+          <h2>⚑ 待人工接管</h2>
+          <div class="sub">3 封等待中 · 最久 1h 22m · AI 已尝试但需要你确认</div>
+        </div>
+        <div class="right">
+          <div class="tabs" style="margin:0;">
+            <div class="tab active">全部 3</div>
+            <div class="tab">敏感词触发 1</div>
+            <div class="tab">超过轮次 1</div>
+            <div class="tab">客户指名 1</div>
+          </div>
+          <button class="btn ghost">↻ 全部交还 AI</button>
+        </div>
+      </div>
+
+      <!-- 接管卡片列表 -->
+      <div style="display:flex;flex-direction:column;gap:14px;">
+
+        <!-- 卡片 1 -->
+        <div class="card" style="border-left:4px solid #dc2626;">
+          <div style="padding:16px 20px;display:grid;grid-template-columns:48px 1fr 280px;gap:18px;align-items:start;">
+            <div class="who-pic" style="width:48px;height:48px;font-size:14px;background:#fef2f2;color:#dc2626;">DK</div>
+            <div style="min-width:0;">
+              <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+                <div style="font-weight:600;color:#0f172a;font-size:15px;">David Kim · NovaPay</div>
+                <span class="tag human">⚠ 敏感词：enterprise SLA / on-prem</span>
+                <span style="color:#dc2626;font-size:12px;font-weight:600;">已等待 1h 22m</span>
+              </div>
+              <div style="color:#6b7280;font-size:12.5px;margin-top:4px;">
+                david.kim@novapay.com · FB Ads「Fintech Q2」· 沟通 2 轮
+              </div>
+
+              <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:10px 12px;margin-top:10px;font-size:13px;color:#7f1d1d;">
+                <b>客户原话：</b>"Actually, we need an enterprise SLA with on-prem deployment, can you handle SOC2 + HIPAA?"
+              </div>
+
+              <div style="background:#f5f7ff;border:1px dashed #c7d2fe;border-radius:8px;padding:10px 12px;margin-top:8px;font-size:12.5px;color:#3730a3;">
+                <b>✦ AI 暂存草稿（未发送）：</b>"Thanks David! Enterprise SLA & on-prem are available on our Custom tier. Let me loop in our solutions lead…"
+                <span style="color:#9ca3af;"> — 因话术包含敏感词，已暂停等你确认</span>
+              </div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:6px;">
+              <button class="btn">✎ 编辑后发送</button>
+              <button class="btn ghost">✓ 直接发送 AI 草稿</button>
+              <button class="btn ghost">↻ AI 重新接管</button>
+              <button class="btn ghost" style="color:#6b7280;">查看完整对话 →</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 卡片 2 -->
+        <div class="card" style="border-left:4px solid #f59e0b;">
+          <div style="padding:16px 20px;display:grid;grid-template-columns:48px 1fr 280px;gap:18px;align-items:start;">
+            <div class="who-pic" style="width:48px;height:48px;font-size:14px;background:#fffbeb;color:#b45309;">RT</div>
+            <div style="min-width:0;">
+              <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+                <div style="font-weight:600;color:#0f172a;font-size:15px;">Rachel Torres · Hill & Mason LLP</div>
+                <span class="tag" style="background:#fffbeb;color:#92400e;">⚠ 已达 5 轮上限</span>
+                <span style="color:#d97706;font-size:12px;font-weight:600;">已等待 46m</span>
+              </div>
+              <div style="color:#6b7280;font-size:12.5px;margin-top:4px;">
+                rachel@hillmason.law · FB Ads「Legal Outreach」· 沟通 5 轮
+              </div>
+
+              <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:10px 12px;margin-top:10px;font-size:13px;color:#78350f;">
+                <b>客户原话：</b>"I'm still not clear on data residency. Where exactly are your servers and which jurisdiction governs disputes?"
+              </div>
+
+              <div style="background:#f5f7ff;border:1px dashed #c7d2fe;border-radius:8px;padding:10px 12px;margin-top:8px;font-size:12.5px;color:#3730a3;">
+                <b>✦ AI 总结：</b>客户已多轮追问数据合规细节，话术手册无覆盖。意向 ●●●○○ 中。建议销售亲自回答后再交回 AI。
+              </div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:6px;">
+              <button class="btn">✎ 我来回复</button>
+              <button class="btn ghost">↻ 让 AI 继续尝试</button>
+              <button class="btn ghost" style="color:#6b7280;">查看完整对话 →</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 卡片 3 -->
+        <div class="card" style="border-left:4px solid #6366f1;">
+          <div style="padding:16px 20px;display:grid;grid-template-columns:48px 1fr 280px;gap:18px;align-items:start;">
+            <div class="who-pic" style="width:48px;height:48px;font-size:14px;background:#eef2ff;color:#4f46e5;">YN</div>
+            <div style="min-width:0;">
+              <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+                <div style="font-weight:600;color:#0f172a;font-size:15px;">Yuki Nakamura · Sakura Studio</div>
+                <span class="tag" style="background:#eef2ff;color:#4338ca;">👤 客户指名要"真人销售"</span>
+                <span style="color:#6b7280;font-size:12px;font-weight:600;">已等待 18m</span>
+              </div>
+              <div style="color:#6b7280;font-size:12.5px;margin-top:4px;">
+                yuki@sakura.jp · FB Ads「APAC Creative」· 沟通 2 轮
+              </div>
+
+              <div style="background:#eef2ff;border:1px solid #c7d2fe;border-radius:8px;padding:10px 12px;margin-top:10px;font-size:13px;color:#312e81;">
+                <b>客户原话：</b>"Could I speak with a real account manager? I'd prefer to discuss budget over a call."
+              </div>
+
+              <div style="background:#ecfdf5;border:1px dashed #a7f3d0;border-radius:8px;padding:10px 12px;margin-top:8px;font-size:12.5px;color:#065f46;">
+                <b>✦ AI 建议：</b>客户明确要求真人沟通，意向 ●●●●○ 高。已为你预占 6/10 11:00 JST。
+              </div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:6px;">
+              <button class="btn">📞 接管 + 约会</button>
+              <button class="btn ghost">✎ 个人回复</button>
+              <button class="btn ghost" style="color:#6b7280;">查看完整对话 →</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ FRAME 4 (NEW): CUSTOMER PROFILE ============ -->
+<div class="frame">
+  <div class="frame-label">
+    <span class="dot"></span><span class="dot y"></span><span class="dot g"></span>
+    <span class="name">界面 4 · 客户档案</span>
+    <span class="url">mailpilot.ai/customers</span>
+  </div>
+  <div class="app">
+    <div class="sidebar">
+      <div class="logo">
+        <div class="logo-mark">M</div>
+        <div class="logo-text">MailPilot<small>Lead Follow-up Agent</small></div>
+      </div>
+      <div class="nav">
+        <div class="nav-section">主导航</div>
+        <div class="nav-item"><span class="nav-icon">◐</span>概览</div>
+        <div class="nav-item"><span class="nav-icon">✉</span>邮件队列<span class="badge">12</span></div>
+        <div class="nav-item"><span class="nav-icon">▤</span>会议日历</div>
+        <div class="nav-item"><span class="nav-icon">⚑</span>待人工接管<span class="badge">3</span></div>
+        <div class="nav-item active"><span class="nav-icon">◇</span>客户档案</div>
+        <div class="nav-section">配置</div>
+        <div class="nav-item"><span class="nav-icon">⚙</span>账户与话术</div>
+        <div class="nav-item"><span class="nav-icon">⌬</span>Agent 行为</div>
+      </div>
+      <div class="sidebar-foot">
+        <div class="avatar">EW</div>
+        <div>
+          <div style="color:#fff;font-weight:600;">Even Wu</div>
+          <div style="color:#94a3b8;">sales@acme.io</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="main" style="padding:0;background:#fff;">
+      <div style="display:grid;grid-template-columns:320px 1fr;height:100%;">
+
+        <!-- 客户列表 -->
+        <div style="border-right:1px solid #eef0f4;overflow:auto;">
+          <div style="padding:16px;border-bottom:1px solid #eef0f4;">
+            <input placeholder="🔍 搜索客户 / 公司 / 标签" style="width:100%;padding:8px 12px;border:1px solid #e5e7eb;border-radius:8px;font-size:13px;background:#f7f8fc;" />
+            <div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap;">
+              <span class="tag" style="background:#eef2ff;color:#4338ca;cursor:pointer;">全部 142</span>
+              <span class="tag" style="background:#f1f5f9;color:#475569;cursor:pointer;">高意向 23</span>
+              <span class="tag" style="background:#f1f5f9;color:#475569;cursor:pointer;">已成单 9</span>
+              <span class="tag" style="background:#f1f5f9;color:#475569;cursor:pointer;">流失 12</span>
+            </div>
+          </div>
+
+          <div class="mini-row" style="background:#eef2ff;">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <div class="who-pic" style="background:#fef3c7;color:#b45309;">MR</div>
+              <div style="flex:1;min-width:0;">
+                <div class="sender">Marcus Reed</div>
+                <div class="sub">BlueOcean Logistics · 3PL</div>
+              </div>
+              <div style="color:#059669;font-size:11px;font-weight:600;">●●●●○</div>
+            </div>
+          </div>
+
+          <div class="mini-row">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <div class="who-pic" style="background:#ecfdf5;color:#059669;">EL</div>
+              <div style="flex:1;min-width:0;">
+                <div class="sender">Emma Lopez</div>
+                <div class="sub">Bright Studio · 设计</div>
+              </div>
+              <div style="color:#059669;font-size:11px;font-weight:600;">●●●●●</div>
+            </div>
+          </div>
+
+          <div class="mini-row">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <div class="who-pic" style="background:#fef2f2;color:#dc2626;">DK</div>
+              <div style="flex:1;min-width:0;">
+                <div class="sender">David Kim</div>
+                <div class="sub">NovaPay · 金融科技</div>
+              </div>
+              <div style="color:#d97706;font-size:11px;font-weight:600;">●●●○○</div>
+            </div>
+          </div>
+
+          <div class="mini-row">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <div class="who-pic">SJ</div>
+              <div style="flex:1;min-width:0;">
+                <div class="sender">Sarah Johnson</div>
+                <div class="sub">TechCorp · SaaS</div>
+              </div>
+              <div style="color:#6b7280;font-size:11px;font-weight:600;">●●○○○</div>
+            </div>
+          </div>
+
+          <div class="mini-row">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <div class="who-pic">AC</div>
+              <div style="flex:1;min-width:0;">
+                <div class="sender">Alex Chen</div>
+                <div class="sub">Pixel Labs · 游戏</div>
+              </div>
+              <div style="color:#059669;font-size:11px;font-weight:600;">●●●●○</div>
+            </div>
+          </div>
+
+          <div class="mini-row">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <div class="who-pic" style="background:#ecfdf5;color:#059669;">JT</div>
+              <div style="flex:1;min-width:0;">
+                <div class="sender">Jenna Taylor</div>
+                <div class="sub">Loom Retail · 零售</div>
+              </div>
+              <div style="color:#059669;font-size:11px;font-weight:600;">●●●●●</div>
+            </div>
+          </div>
+
+          <div class="mini-row">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <div class="who-pic">PB</div>
+              <div style="flex:1;min-width:0;">
+                <div class="sender">Priya Banerjee</div>
+                <div class="sub">Hyperion AI · AI 平台</div>
+              </div>
+              <div style="color:#6b7280;font-size:11px;font-weight:600;">●●●○○</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 客户详情 -->
+        <div style="overflow:auto;padding:24px 28px;background:#f7f8fc;">
+          <!-- 头部 -->
+          <div style="display:flex;gap:16px;align-items:center;margin-bottom:18px;">
+            <div class="who-pic" style="width:60px;height:60px;font-size:18px;background:#fef3c7;color:#b45309;">MR</div>
+            <div style="flex:1;">
+              <div style="font-size:20px;font-weight:700;color:#0f172a;">Marcus Reed</div>
+              <div style="color:#6b7280;font-size:13px;margin-top:2px;">
+                Operations Director · BlueOcean Logistics · San Diego, US
+              </div>
+              <div style="margin-top:8px;display:flex;gap:6px;">
+                <span class="tag meeting">✓ 已约会 6/9 14:00 PT</span>
+                <span class="tag" style="background:#e0e7ff;color:#3730a3;">意向 ●●●●○ 高</span>
+                <span class="tag" style="background:#f1f5f9;color:#475569;">FB Ads · Summer 2026</span>
+              </div>
+            </div>
+            <button class="btn ghost">✉ 发邮件</button>
+            <button class="btn">查看对话</button>
+          </div>
+
+          <!-- 三栏信息 -->
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:18px;">
+            <div class="card" style="padding:14px 16px;">
+              <div style="color:#6b7280;font-size:11.5px;text-transform:uppercase;letter-spacing:.5px;">联系方式</div>
+              <div style="font-size:13px;margin-top:8px;line-height:1.8;color:#374151;">
+                ✉ marcus.reed@blueocean.com<br>
+                📞 +1 (619) 555-0142<br>
+                💼 linkedin.com/in/marcusreed
+              </div>
+            </div>
+            <div class="card" style="padding:14px 16px;">
+              <div style="color:#6b7280;font-size:11.5px;text-transform:uppercase;letter-spacing:.5px;">公司</div>
+              <div style="font-size:13px;margin-top:8px;line-height:1.8;color:#374151;">
+                BlueOcean Logistics · 3PL<br>
+                120 员工 · ARR $18M<br>
+                <span style="color:#4f46e5;">blueocean-logistics.com</span>
+              </div>
+            </div>
+            <div class="card" style="padding:14px 16px;">
+              <div style="color:#6b7280;font-size:11.5px;text-transform:uppercase;letter-spacing:.5px;">跟进进度</div>
+              <div style="font-size:13px;margin-top:8px;line-height:1.8;color:#374151;">
+                首封：6/7 09:12<br>
+                轮次：3 轮 / 2 天<br>
+                状态：<b style="color:#059669;">已约会 · 等待会议</b>
+              </div>
+            </div>
+          </div>
+
+          <!-- AI 提取的关注点 -->
+          <div class="card" style="padding:16px 18px;margin-bottom:14px;">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+              <div style="font-size:14px;font-weight:600;color:#0f172a;">🧠 AI 提取的客户画像</div>
+              <span style="color:#9ca3af;font-size:11.5px;">基于 3 轮对话 · 最后更新 10 分钟前</span>
+            </div>
+            <div style="margin-bottom:10px;">
+              <span class="keyword">NetSuite 集成</span>
+              <span class="keyword">3PL 行业</span>
+              <span class="keyword">120 员工</span>
+              <span class="keyword">向 COO 汇报</span>
+              <span class="keyword">价格敏感</span>
+              <span class="keyword">需要 one-pager</span>
+              <span class="keyword">实施周期关注</span>
+            </div>
+            <div style="background:#f7f8fc;border-radius:8px;padding:12px 14px;font-size:13px;color:#374151;line-height:1.7;">
+              <b style="color:#0f172a;">核心痛点：</b>订单可视化分散在 4 个系统，运营每天 2 小时人工对账。<br>
+              <b style="color:#0f172a;">决策链：</b>Marcus 推荐 → COO 拍板。<br>
+              <b style="color:#0f172a;">异议预测：</b>可能担心实施周期 &gt; 4 周。
+            </div>
+          </div>
+
+          <!-- Tab -->
+          <div style="display:flex;gap:4px;border-bottom:1px solid #eef0f4;margin-bottom:12px;">
+            <div class="tab active" style="border-bottom:2px solid #4f46e5;border-radius:0;padding:8px 14px;">📧 邮件历史 (3)</div>
+            <div class="tab" style="padding:8px 14px;">📅 会议 (1)</div>
+            <div class="tab" style="padding:8px 14px;">📎 文件 (2)</div>
+            <div class="tab" style="padding:8px 14px;">📝 手动备注</div>
+          </div>
+
+          <div class="card">
+            <div style="padding:12px 16px;display:grid;grid-template-columns:80px 1fr 100px;gap:12px;border-bottom:1px solid #f3f4f7;align-items:center;font-size:13px;">
+              <span style="color:#9ca3af;font-size:12px;">今 10:48</span>
+              <div>
+                <b>客户：</b> Tuesday works. Can you also send a one-pager…
+              </div>
+              <span class="tag" style="background:#f1f5f9;color:#475569;">收件</span>
+            </div>
+            <div style="padding:12px 16px;display:grid;grid-template-columns:80px 1fr 100px;gap:12px;border-bottom:1px solid #f3f4f7;align-items:center;font-size:13px;">
+              <span style="color:#9ca3af;font-size:12px;">今 09:14</span>
+              <div>
+                <b style="color:#4f46e5;">AI：</b> Thanks for reaching out! We have a native NetSuite connector…
+              </div>
+              <span class="tag ai">AI 发送</span>
+            </div>
+            <div style="padding:12px 16px;display:grid;grid-template-columns:80px 1fr 100px;gap:12px;align-items:center;font-size:13px;">
+              <span style="color:#9ca3af;font-size:12px;">今 09:12</span>
+              <div>
+                <b>客户：</b> I saw your ad about workflow automation for logistics…
+              </div>
+              <span class="tag new">首封</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ FRAME 5: MEETING CALENDAR ============ -->
+<div class="frame">
+  <div class="frame-label">
+    <span class="dot"></span><span class="dot y"></span><span class="dot g"></span>
+    <span class="name">界面 5 · 会议日历 + 客户详情</span>
+    <span class="url">mailpilot.ai/meetings</span>
+  </div>
+  <div class="app">
+    <div class="sidebar">
+      <div class="logo">
+        <div class="logo-mark">M</div>
+        <div class="logo-text">MailPilot<small>Lead Follow-up Agent</small></div>
+      </div>
+      <div class="nav">
+        <div class="nav-section">主导航</div>
+        <div class="nav-item"><span class="nav-icon">◐</span>概览</div>
+        <div class="nav-item"><span class="nav-icon">✉</span>邮件队列<span class="badge">12</span></div>
+        <div class="nav-item active"><span class="nav-icon">▤</span>会议日历</div>
+        <div class="nav-item"><span class="nav-icon">⚑</span>待人工接管<span class="badge">3</span></div>
+        <div class="nav-item"><span class="nav-icon">◇</span>客户档案</div>
+        <div class="nav-section">配置</div>
+        <div class="nav-item"><span class="nav-icon">⚙</span>账户与话术</div>
+        <div class="nav-item"><span class="nav-icon">⌬</span>Agent 行为</div>
+      </div>
+      <div class="sidebar-foot">
+        <div class="avatar">EW</div>
+        <div>
+          <div style="color:#fff;font-weight:600;">Even Wu</div>
+          <div style="color:#94a3b8;">sales@acme.io</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="main">
+      <div class="topbar">
+        <div>
+          <h2>📅 会议日历</h2>
+          <div class="sub">已与 Google Calendar 双向同步 · 本周 9 场 Meet，3 场待客户确认</div>
+        </div>
+        <div class="right">
+          <div class="pill"><span class="led"></span> Google Calendar 已连接</div>
+          <button class="btn ghost">⇋ 设置可约时段</button>
+          <button class="btn">+ 手动新建会议</button>
+        </div>
+      </div>
+
+      <div class="calendar" style="padding:0;">
+        <div class="cal-head" style="padding:0 0 14px;">
+          <h3>2026 年 6 月 · 第 24 周</h3>
+          <div class="cal-nav">
+            <button>‹</button>
+            <button>今天</button>
+            <button>›</button>
+            <button>日</button>
+            <button class="active">周</button>
+            <button>月</button>
+          </div>
+        </div>
+
+        <div class="week-grid">
+          <div class="wg-head"></div>
+          <div class="wg-head">周一<b>6/8</b></div>
+          <div class="wg-head today">周二<b>6/9</b></div>
+          <div class="wg-head">周三<b>6/10</b></div>
+          <div class="wg-head">周四<b>6/11</b></div>
+          <div class="wg-head">周五<b>6/12</b></div>
+          <div class="wg-head">周六<b>6/13</b></div>
+          <div class="wg-head">周日<b>6/14</b></div>
+
+          <div class="wg-time">09:00</div>
+          <div class="wg-cell"></div>
+          <div class="wg-cell">
+            <div class="ev green">Jenna Taylor<small>10:00 · Loom Retail · Google Meet</small></div>
+          </div>
+          <div class="wg-cell"></div>
+          <div class="wg-cell">
+            <div class="ev">Priya Banerjee<small>09:30 · Hyperion AI</small></div>
+          </div>
+          <div class="wg-cell"></div>
+          <div class="wg-cell"></div>
+          <div class="wg-cell"></div>
+
+          <div class="wg-time">11:00</div>
+          <div class="wg-cell">
+            <div class="ev amber">Alex Chen<small>11:30 · Pixel Labs · 待确认</small></div>
+          </div>
+          <div class="wg-cell"></div>
+          <div class="wg-cell"></div>
+          <div class="wg-cell">
+            <div class="ev pink">Internal Sync<small>11:00 · 团队</small></div>
+          </div>
+          <div class="wg-cell"></div>
+          <div class="wg-cell"></div>
+          <div class="wg-cell"></div>
+
+          <div class="wg-time">14:00</div>
+          <div class="wg-cell"></div>
+          <div class="wg-cell">
+            <div class="ev" style="border-left-color:#4f46e5;background:#e0e7ff;">
+              Marcus Reed<small>14:00 · BlueOcean Logistics</small>
+            </div>
+          </div>
+          <div class="wg-cell">
+            <div class="ev green">Emma Lopez<small>15:00 · Bright Studio</small></div>
+          </div>
+          <div class="wg-cell"></div>
+          <div class="wg-cell">
+            <div class="ev amber">Tomás Silva<small>14:30 · Andes Capital · 待确认</small></div>
+          </div>
+          <div class="wg-cell"></div>
+          <div class="wg-cell"></div>
+
+          <div class="wg-time">16:00</div>
+          <div class="wg-cell"></div>
+          <div class="wg-cell"></div>
+          <div class="wg-cell">
+            <div class="ev green">Sarah Johnson<small>16:30 · TechCorp</small></div>
+          </div>
+          <div class="wg-cell"></div>
+          <div class="wg-cell">
+            <div class="ev">Lena Schmidt<small>16:00 · Volta GmbH</small></div>
+          </div>
+          <div class="wg-cell"></div>
+          <div class="wg-cell"></div>
+        </div>
+
+        <!-- 会议详情 -->
+        <div class="meeting-detail">
+          <div class="md-card">
+            <h4>📌 会议详情：Marcus Reed · BlueOcean Logistics
+              <span class="tag" style="background:#e0e7ff;color:#3730a3;margin-left:auto;">AI 自动安排</span>
+            </h4>
+            <div class="field"><b>时间</b><span>2026-06-09 · 14:00 – 14:30 (PT)</span></div>
+            <div class="field"><b>Meet 链接</b><span style="color:#4f46e5;">meet.google.com/aip-fjxq-knu</span></div>
+            <div class="field"><b>参会人</b><span>Marcus Reed (COO 列席) · Even Wu</span></div>
+            <div class="field"><b>会议议题</b><span>NetSuite 集成方案 + 3PL 定价讨论</span></div>
+            <div class="field"><b>来源对话</b><span style="color:#4f46e5;">Thread #9f2c · 3 轮邮件</span></div>
+
+            <div style="margin-top:12px; border-top:1px solid #eef0f4; padding-top:12px;">
+              <h4 style="margin-bottom:8px;">📜 客户历史邮件（最近 3 封）</h4>
+              <div style="font-size:12.5px; color:#475569;">
+                <div style="padding:6px 0;border-bottom:1px dashed #eef0f4;">
+                  <b>06-07 09:12</b> · 客户首封：询问定价 / NetSuite 集成
+                </div>
+                <div style="padding:6px 0;border-bottom:1px dashed #eef0f4;">
+                  <b>06-07 09:14</b> · AI 回复：提议 6/9 14:00 PT 通话
+                </div>
+                <div style="padding:6px 0;">
+                  <b>06-07 10:48</b> · 客户：确认时间，要求 one-pager 与 demo
+                </div>
+              </div>
+              <button class="btn ghost" style="margin-top:10px;">查看完整邮件线 →</button>
+            </div>
+          </div>
+
+          <div class="md-card">
+            <h4>🎯 客户特点 & 关注点</h4>
+            <div style="margin-bottom:12px;">
+              <span class="keyword">NetSuite 集成</span>
+              <span class="keyword">3PL · 物流</span>
+              <span class="keyword">120 员工</span>
+              <span class="keyword">向 COO 汇报</span>
+              <span class="keyword">价格敏感</span>
+              <span class="keyword">需要 one-pager</span>
+            </div>
+
+            <div class="focus-list">
+              <div class="fl-item">
+                <b>核心痛点：</b>订单可视化分散在 4 个系统，运营每天 2 小时人工对账。
+              </div>
+              <div class="fl-item">
+                <b>决策链：</b>Marcus 推荐 → COO 拍板，会议中需说服 COO。
+              </div>
+              <div class="fl-item">
+                <b>异议预测：</b>可能担心实施周期 &gt; 4 周，建议主动给出 14 天上线案例。
+              </div>
+              <div class="fl-item">
+                <b>下一步建议：</b>会后 24h 内发感谢信 + ROI 估算表。Agent 将自动起草。
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ FRAME 4: SETUP WIZARD ============ -->
+<div class="frame">
+  <div class="frame-label">
+    <span class="dot"></span><span class="dot y"></span><span class="dot g"></span>
+    <span class="name">界面 6 · 首次配置向导（邮箱 / 官网 / 话术手册）</span>
+    <span class="url">mailpilot.ai/onboarding</span>
+  </div>
+  <div class="app">
+    <div class="sidebar">
+      <div class="logo">
+        <div class="logo-mark">M</div>
+        <div class="logo-text">MailPilot<small>Lead Follow-up Agent</small></div>
+      </div>
+      <div class="nav">
+        <div class="nav-section">配置流程</div>
+        <div class="nav-item" style="color:#10b981;"><span class="nav-icon">✓</span>1. 创建账户</div>
+        <div class="nav-item active"><span class="nav-icon">▸</span>2. 连接资源</div>
+        <div class="nav-item"><span class="nav-icon">○</span>3. Agent 试跑</div>
+        <div class="nav-item"><span class="nav-icon">○</span>4. 启用上线</div>
+      </div>
+      <div class="sidebar-foot">
+        <div class="avatar">EW</div>
+        <div>
+          <div style="color:#fff;font-weight:600;">Even Wu</div>
+          <div style="color:#94a3b8;">setup mode</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="main" style="background:#f7f8fc;">
+      <div class="setup">
+        <div class="setup-head">
+          <h2>欢迎使用 MailPilot · 让我们花 3 分钟完成配置</h2>
+          <p>连接你的 Google 邮箱、官网和话术手册，Agent 就能开始自动跟进 Facebook 表单线索</p>
+        </div>
+
+        <div class="steps">
+          <div class="step done"><div class="num">✓</div><span>账户</span></div>
+          <div class="step-line"></div>
+          <div class="step active"><div class="num">2</div><span>连接资源</span></div>
+          <div class="step-line"></div>
+          <div class="step"><div class="num">3</div><span>Agent 试跑</span></div>
+          <div class="step-line"></div>
+          <div class="step"><div class="num">4</div><span>启用</span></div>
+        </div>
+
+        <div class="setup-grid">
+          <!-- 邮箱配置 -->
+          <div class="form-card">
+            <h4>① Google 邮箱</h4>
+            <div class="form-row">
+              <label>📥 收件邮箱（接收 FB 表单提交）</label>
+              <button class="gmail-btn connected">
+                <span style="font-size:16px;">✓</span>
+                leads@acme.io · 已通过 OAuth 授权
+              </button>
+            </div>
+            <div class="checkbox-row">
+              <input type="checkbox" checked> 一收一发使用同一个邮箱
+            </div>
+            <div class="form-row" style="margin-top:14px;opacity:.5;">
+              <label>📤 发件邮箱（可选 · 单独使用）</label>
+              <button class="gmail-btn">+ 连接另一个 Google 账号</button>
+            </div>
+
+            <div style="background:#ecfdf5;border:1px solid #a7f3d0;border-radius:8px;padding:10px 12px;font-size:12.5px;color:#065f46;margin-top:6px;">
+              ✓ 已检测到 <b>52 封</b> 来自 Facebook 表单的未处理邮件，将在启用后开始跟进。
+            </div>
+          </div>
+
+          <!-- 官网 -->
+          <div class="form-card">
+            <h4>② 官网链接</h4>
+            <div class="form-row">
+              <label>公司官网 URL（Agent 用于了解产品与术语）</label>
+              <input value="https://acme.io" />
+            </div>
+            <div class="form-row">
+              <label>需 Agent 重点学习的页面（可选）</label>
+              <textarea>https://acme.io/pricing
+https://acme.io/integrations/netsuite
+https://acme.io/customers/3pl</textarea>
+            </div>
+            <div style="background:#eef2ff;border:1px solid #c7d2fe;border-radius:8px;padding:10px 12px;font-size:12.5px;color:#3730a3;">
+              🧠 抓取后将自动总结出 <b>产品定位 / 定价 / 集成清单 / 客户案例</b> 知识库
+            </div>
+          </div>
+
+          <!-- 话术手册 -->
+          <div class="form-card" style="grid-column: span 2;">
+            <h4>③ 话术手册 <span style="color:#9ca3af;font-weight:400;font-size:12.5px;">（非必备 · 不上传则使用通用销售话术）</span></h4>
+            <div style="display:grid;grid-template-columns: 1fr 1fr; gap:18px;">
+              <div>
+                <div class="uploader">
+                  ⬆ 上传 PDF / DOCX / Markdown
+                  <small>支持多文件 · 单文件最大 20MB</small>
+                </div>
+                <div style="margin-top:10px;font-size:12.5px;">
+                  <div style="background:#fff;border:1px solid #eef0f4;border-radius:8px;padding:8px 12px;display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+                    📄 <b>3PL Pricing & Integration v2.pdf</b>
+                    <span style="margin-left:auto;color:#059669;">已解析 · 18 个场景</span>
+                  </div>
+                  <div style="background:#fff;border:1px solid #eef0f4;border-radius:8px;padding:8px 12px;display:flex;align-items:center;gap:8px;">
+                    📄 <b>SaaS Outbound Playbook.docx</b>
+                    <span style="margin-left:auto;color:#059669;">已解析 · 12 个场景</span>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <div class="form-row">
+                  <label>会议时长偏好</label>
+                  <select>
+                    <option>30 分钟（默认）</option>
+                    <option>15 分钟</option>
+                    <option>45 分钟</option>
+                  </select>
+                </div>
+                <div class="form-row">
+                  <label>客户提到以下关键词时立即转人工</label>
+                  <input value="enterprise SLA, on-prem, legal, refund, complaint" />
+                </div>
+                <div class="form-row" style="margin-bottom:0;">
+                  <label>AI 单线程最大自动往返轮次</label>
+                  <select>
+                    <option>5 轮（推荐）</option>
+                    <option>3 轮</option>
+                    <option>8 轮</option>
+                    <option>不限制</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="setup-foot">
+          <button class="btn ghost">← 上一步</button>
+          <div style="color:#6b7280;font-size:12px;align-self:center;">
+            🔒 所有数据加密存储 · 你可随时在「Agent 行为」中调整
+          </div>
+          <button class="btn">下一步：让 Agent 试跑 3 封邮件 →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<div class="legend">
+  🎨 配色：Indigo #4f46e5 主色 / Emerald 成功 / Amber 等待 / Red 待人工 ·
+  字体：系统 UI ·
+  本原型为静态高保真，所有数据为示例数据。
+</div>
+
+</body>
+</html>
