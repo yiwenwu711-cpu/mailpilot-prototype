@@ -402,7 +402,7 @@
 <div class="page-title">
   <div>
     <h1>MailPilot · Facebook 广告表单跟进 Agent</h1>
-    <p>高保真原型 · 6 个核心界面 · 销售自动化邮件回复 + Google Meet 预约</p>
+    <p>高保真原型 · 5 主界面 + 4 配置流程页 · 销售自动化邮件回复 + Google Meet 预约</p>
   </div>
   <div class="pill"><span class="led"></span> Prototype v1.0 · 2026-06-07</div>
 </div>
@@ -1492,12 +1492,134 @@
   </div>
 </div>
 
-<!-- ============ FRAME 4: SETUP WIZARD ============ -->
+<!-- ============ FRAME 6: SETUP STEP 1 - SIGN UP ============ -->
 <div class="frame">
   <div class="frame-label">
     <span class="dot"></span><span class="dot y"></span><span class="dot g"></span>
-    <span class="name">界面 6 · 首次配置向导（邮箱 / 官网 / 话术手册）</span>
-    <span class="url">mailpilot.ai/onboarding</span>
+    <span class="name">界面 6 · 配置流程 · 步骤 1：创建账户</span>
+    <span class="url">mailpilot.ai/onboarding/signup</span>
+  </div>
+  <div class="app">
+    <div class="sidebar">
+      <div class="logo">
+        <div class="logo-mark">M</div>
+        <div class="logo-text">MailPilot<small>Lead Follow-up Agent</small></div>
+      </div>
+      <div class="nav">
+        <div class="nav-section">配置流程</div>
+        <div class="nav-item active"><span class="nav-icon">▸</span>1. 创建账户</div>
+        <div class="nav-item"><span class="nav-icon">○</span>2. 连接资源</div>
+        <div class="nav-item"><span class="nav-icon">○</span>3. Agent 试跑</div>
+        <div class="nav-item"><span class="nav-icon">○</span>4. 启用上线</div>
+      </div>
+      <div class="sidebar-foot">
+        <div class="avatar" style="background:linear-gradient(135deg,#94a3b8,#64748b);">?</div>
+        <div>
+          <div style="color:#fff;font-weight:600;">新用户</div>
+          <div style="color:#94a3b8;">未登录</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="main" style="background:#f7f8fc;">
+      <div class="setup">
+        <div class="setup-head">
+          <h2>👋 欢迎使用 MailPilot · 先建一个工作账户</h2>
+          <p>账户用于绑定话术、客户、会议数据，后续可邀请同事加入同一团队</p>
+        </div>
+
+        <div class="steps">
+          <div class="step active"><div class="num">1</div><span>账户</span></div>
+          <div class="step-line"></div>
+          <div class="step"><div class="num">2</div><span>连接资源</span></div>
+          <div class="step-line"></div>
+          <div class="step"><div class="num">3</div><span>Agent 试跑</span></div>
+          <div class="step-line"></div>
+          <div class="step"><div class="num">4</div><span>启用</span></div>
+        </div>
+
+        <div class="setup-grid" style="grid-template-columns:1.1fr 1fr;">
+          <div class="form-card">
+            <h4>① 登录方式</h4>
+            <button class="gmail-btn" style="margin-bottom:6px;">
+              <span style="color:#4285f4;font-weight:700;">G</span> 使用 Google 账户一键注册
+            </button>
+            <div style="text-align:center;color:#9ca3af;font-size:12px;margin:14px 0;position:relative;">
+              <span style="background:#fff;padding:0 12px;position:relative;z-index:1;">— 或邮箱注册 —</span>
+              <div style="position:absolute;top:50%;left:0;right:0;height:1px;background:#e5e7eb;"></div>
+            </div>
+            <div class="form-row">
+              <label>工作邮箱</label>
+              <input value="even@acme.io" />
+            </div>
+            <div class="form-row">
+              <label>设置密码</label>
+              <input type="password" value="••••••••••••" />
+            </div>
+            <div class="checkbox-row">
+              <input type="checkbox" checked> 我已阅读并同意《服务条款》和《隐私政策》
+            </div>
+            <div style="background:#eef2ff;border:1px solid #c7d2fe;border-radius:8px;padding:10px 12px;font-size:12px;color:#3730a3;margin-top:14px;">
+              💡 推荐使用 Google 登录，下一步连接 Gmail 时可省去授权
+            </div>
+          </div>
+
+          <div class="form-card">
+            <h4>② 团队信息（用于话术风格初始化）</h4>
+            <div class="form-row">
+              <label>公司名称</label>
+              <input value="Acme Workflow Inc." />
+            </div>
+            <div class="form-row">
+              <label>你的角色</label>
+              <select>
+                <option>销售（个人贡献者）</option>
+                <option>销售主管 / RevOps</option>
+                <option>创始人 / CEO</option>
+                <option>市场负责人</option>
+              </select>
+            </div>
+            <div class="form-row">
+              <label>团队规模</label>
+              <select>
+                <option>1 - 5 人</option>
+                <option>5 - 20 人（推荐）</option>
+                <option>20 - 100 人</option>
+                <option>100+ 人</option>
+              </select>
+            </div>
+            <div class="form-row" style="margin-bottom:0;">
+              <label>主要客户来源（多选 · 影响 Agent 默认话术）</label>
+              <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:4px;">
+                <span class="keyword" style="background:#eef2ff;color:#4338ca;">✓ Facebook 表单</span>
+                <span class="keyword" style="background:#eef2ff;color:#4338ca;">✓ Google Ads</span>
+                <span class="keyword" style="background:#fff;border:1px solid #e5e7eb;color:#6b7280;">LinkedIn</span>
+                <span class="keyword" style="background:#fff;border:1px solid #e5e7eb;color:#6b7280;">官网表单</span>
+                <span class="keyword" style="background:#fff;border:1px solid #e5e7eb;color:#6b7280;">展会 / 线下</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="setup-foot">
+          <button class="btn ghost" style="visibility:hidden;">←</button>
+          <div style="color:#6b7280;font-size:12px;align-self:center;">
+            🔐 工作邮箱仅用于登录，不会用作 Agent 发件箱
+          </div>
+          <button class="btn">创建账户并进入第二步 →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ============ FRAME 7: SETUP STEP 2 - CONNECT RESOURCES (ORIG) ============ -->
+<div class="frame">
+  <div class="frame-label">
+    <span class="dot"></span><span class="dot y"></span><span class="dot g"></span>
+    <span class="name">界面 7 · 配置流程 · 步骤 2：连接资源（邮箱 / 官网 / 话术手册）</span>
+    <span class="url">mailpilot.ai/onboarding/connect</span>
   </div>
   <div class="app">
     <div class="sidebar">
@@ -1633,6 +1755,267 @@ https://acme.io/customers/3pl</textarea>
             🔒 所有数据加密存储 · 你可随时在「Agent 行为」中调整
           </div>
           <button class="btn">下一步：让 Agent 试跑 3 封邮件 →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ============ FRAME 8: SETUP STEP 3 - DRY RUN ============ -->
+<div class="frame">
+  <div class="frame-label">
+    <span class="dot"></span><span class="dot y"></span><span class="dot g"></span>
+    <span class="name">界面 8 · 配置流程 · 步骤 3：Agent 试跑（用 3 封真实邮件验证效果）</span>
+    <span class="url">mailpilot.ai/onboarding/dry-run</span>
+  </div>
+  <div class="app">
+    <div class="sidebar">
+      <div class="logo">
+        <div class="logo-mark">M</div>
+        <div class="logo-text">MailPilot<small>Lead Follow-up Agent</small></div>
+      </div>
+      <div class="nav">
+        <div class="nav-section">配置流程</div>
+        <div class="nav-item" style="color:#10b981;"><span class="nav-icon">✓</span>1. 创建账户</div>
+        <div class="nav-item" style="color:#10b981;"><span class="nav-icon">✓</span>2. 连接资源</div>
+        <div class="nav-item active"><span class="nav-icon">▸</span>3. Agent 试跑</div>
+        <div class="nav-item"><span class="nav-icon">○</span>4. 启用上线</div>
+      </div>
+      <div class="sidebar-foot">
+        <div class="avatar">EW</div>
+        <div>
+          <div style="color:#fff;font-weight:600;">Even Wu</div>
+          <div style="color:#94a3b8;">setup mode</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="main" style="background:#f7f8fc;">
+      <div class="setup">
+        <div class="setup-head">
+          <h2>🧪 Agent 已学会你的产品 · 用 3 封真实邮件验证一下</h2>
+          <p>这一步只生成草稿，不会真正发出去。你可以确认风格 / 内容 / 长度是否合适</p>
+        </div>
+
+        <div class="steps">
+          <div class="step done"><div class="num">✓</div><span>账户</span></div>
+          <div class="step-line"></div>
+          <div class="step done"><div class="num">✓</div><span>连接资源</span></div>
+          <div class="step-line"></div>
+          <div class="step active"><div class="num">3</div><span>Agent 试跑</span></div>
+          <div class="step-line"></div>
+          <div class="step"><div class="num">4</div><span>启用</span></div>
+        </div>
+
+        <!-- 知识库 banner -->
+        <div style="max-width:1080px;margin:0 auto 18px;background:linear-gradient(135deg,#eef2ff,#ecfeff);border:1px solid #c7d2fe;border-radius:12px;padding:14px 18px;display:flex;gap:14px;align-items:center;">
+          <div style="font-size:24px;">🧠</div>
+          <div style="flex:1;">
+            <div style="font-weight:600;color:#3730a3;font-size:13.5px;">Agent 已建立知识库</div>
+            <div style="color:#4f46e5;font-size:12.5px;margin-top:3px;">
+              acme.io · 4 个核心页面 · 12 项常见问题 · 5 个集成方案 · 30 个话术场景已解析
+            </div>
+          </div>
+          <button class="btn ghost">查看知识库 →</button>
+        </div>
+
+        <!-- 试跑卡片区 -->
+        <div style="max-width:1080px;margin:0 auto;">
+          <!-- 进度条 -->
+          <div style="display:flex;gap:12px;margin-bottom:14px;align-items:center;">
+            <div style="font-weight:600;color:#0f172a;font-size:13px;">试跑进度</div>
+            <div style="flex:1;height:6px;background:#e5e7eb;border-radius:3px;overflow:hidden;">
+              <div style="width:66%;height:100%;background:linear-gradient(90deg,#4f46e5,#22d3ee);"></div>
+            </div>
+            <div style="font-size:12.5px;color:#4f46e5;font-weight:600;">2 / 3 已确认</div>
+          </div>
+
+          <!-- 试跑卡 1 (已确认) -->
+          <div style="background:#fff;border:1px solid #eef0f4;border-radius:12px;margin-bottom:10px;overflow:hidden;">
+            <div style="display:flex;gap:12px;align-items:center;padding:12px 18px;border-bottom:1px solid #f3f4f7;">
+              <div class="who-pic">SJ</div>
+              <div style="flex:1;min-width:0;">
+                <div style="font-weight:600;color:#0f172a;font-size:13.5px;">Sarah Johnson · TechCorp Inc.</div>
+                <div style="font-size:12px;color:#6b7280;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">"Hi, I saw your ad on Facebook about the SaaS automation tool…"</div>
+              </div>
+              <span class="tag" style="background:#ecfdf5;color:#059669;">✓ 已确认</span>
+            </div>
+            <div style="padding:10px 18px;font-size:12.5px;color:#6b7280;background:#fafbfd;">
+              ▷ AI 草稿摘要：感谢询问 + 介绍 3 个核心功能（含 NetSuite 集成）+ 提议 6/9 14:00 通话
+            </div>
+          </div>
+
+          <!-- 试跑卡 2 (已确认) -->
+          <div style="background:#fff;border:1px solid #eef0f4;border-radius:12px;margin-bottom:10px;overflow:hidden;">
+            <div style="display:flex;gap:12px;align-items:center;padding:12px 18px;border-bottom:1px solid #f3f4f7;">
+              <div class="who-pic">AC</div>
+              <div style="flex:1;min-width:0;">
+                <div style="font-weight:600;color:#0f172a;font-size:13.5px;">Alex Chen · Pixel Labs</div>
+                <div style="font-size:12px;color:#6b7280;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">"Sounds interesting. Can you send pricing for a 50-seat team?"</div>
+              </div>
+              <span class="tag" style="background:#ecfdf5;color:#059669;">✓ 已确认</span>
+            </div>
+            <div style="padding:10px 18px;font-size:12.5px;color:#6b7280;background:#fafbfd;">
+              ▷ AI 草稿摘要：50 席团队定价 ($4.2k/月) + ROI 速算表 + 提议下周三 demo
+            </div>
+          </div>
+
+          <!-- 试跑卡 3 (当前确认中) -->
+          <div style="background:#fff;border:2px solid #4f46e5;border-radius:12px;margin-bottom:10px;overflow:hidden;box-shadow:0 8px 24px -12px rgba(79,70,229,0.25);">
+            <div style="display:flex;gap:12px;align-items:center;padding:12px 18px;border-bottom:1px solid #eef0f4;">
+              <div class="who-pic" style="background:#fef3c7;color:#b45309;">MR</div>
+              <div style="flex:1;min-width:0;">
+                <div style="font-weight:600;color:#0f172a;font-size:13.5px;">Marcus Reed · BlueOcean Logistics</div>
+                <div style="font-size:12px;color:#6b7280;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">"...could you share more about pricing and integration with NetSuite?"</div>
+              </div>
+              <span class="tag" style="background:#eef2ff;color:#4f46e5;">▸ 当前确认</span>
+            </div>
+            <div style="padding:14px 18px;background:#fafbff;font-size:13px;color:#374151;line-height:1.6;">
+              Hi Marcus,<br><br>
+              Thanks for reaching out! Acme automates lead-routing and order
+              visibility for 3PLs like BlueOcean — we have a native NetSuite
+              connector and a $1.2 / order pricing tier that fits a 120-person team well.<br><br>
+              For Tuesday 2 PM PT, our solutions lead Even Wu is available. Would
+              <b>Tue Jun 9, 14:00 – 14:30 PT</b> work? I'll send a Google Meet invite
+              as soon as you confirm.<br><br>
+              Best, Even (via MailPilot)
+            </div>
+            <div style="padding:10px 14px;border-top:1px solid #eef0f4;display:flex;gap:8px;align-items:center;background:#fff;">
+              <button class="btn">✓ 看起来不错</button>
+              <button class="btn ghost">✎ 编辑草稿</button>
+              <button class="btn ghost">↻ 换个角度重新生成</button>
+              <span style="margin-left:auto;color:#6b7280;font-size:12px;">⚠ 仅生成草稿，不会真正发送给客户</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="setup-foot">
+          <button class="btn ghost">← 上一步</button>
+          <div style="color:#6b7280;font-size:12px;align-self:center;">
+            ⏱ Agent 平均生成一封草稿耗时 1.8 秒
+          </div>
+          <button class="btn">下一步：启用上线 →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ============ FRAME 9: SETUP STEP 4 - LAUNCH ============ -->
+<div class="frame">
+  <div class="frame-label">
+    <span class="dot"></span><span class="dot y"></span><span class="dot g"></span>
+    <span class="name">界面 9 · 配置流程 · 步骤 4：启用上线</span>
+    <span class="url">mailpilot.ai/onboarding/launch</span>
+  </div>
+  <div class="app">
+    <div class="sidebar">
+      <div class="logo">
+        <div class="logo-mark">M</div>
+        <div class="logo-text">MailPilot<small>Lead Follow-up Agent</small></div>
+      </div>
+      <div class="nav">
+        <div class="nav-section">配置流程</div>
+        <div class="nav-item" style="color:#10b981;"><span class="nav-icon">✓</span>1. 创建账户</div>
+        <div class="nav-item" style="color:#10b981;"><span class="nav-icon">✓</span>2. 连接资源</div>
+        <div class="nav-item" style="color:#10b981;"><span class="nav-icon">✓</span>3. Agent 试跑</div>
+        <div class="nav-item active"><span class="nav-icon">▸</span>4. 启用上线</div>
+      </div>
+      <div class="sidebar-foot">
+        <div class="avatar">EW</div>
+        <div>
+          <div style="color:#fff;font-weight:600;">Even Wu</div>
+          <div style="color:#94a3b8;">setup mode</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="main" style="background:#f7f8fc;">
+      <div class="setup">
+        <div class="setup-head">
+          <h2>🎉 全部就绪 · 启用后立刻接管 52 封待跟进邮件</h2>
+          <p>Agent 会按你设定的工作时段自动回复，你可在概览页随时查看 / 暂停 / 转人工</p>
+        </div>
+
+        <div class="steps">
+          <div class="step done"><div class="num">✓</div><span>账户</span></div>
+          <div class="step-line"></div>
+          <div class="step done"><div class="num">✓</div><span>连接资源</span></div>
+          <div class="step-line"></div>
+          <div class="step done"><div class="num">✓</div><span>Agent 试跑</span></div>
+          <div class="step-line"></div>
+          <div class="step active"><div class="num">4</div><span>启用</span></div>
+        </div>
+
+        <!-- 配置确认网格 -->
+        <div style="max-width:920px;margin:0 auto 18px;display:grid;grid-template-columns:repeat(2,1fr);gap:12px;">
+          <div style="background:#fff;border:1px solid #eef0f4;border-radius:10px;padding:14px 16px;display:flex;gap:12px;align-items:center;">
+            <div style="width:32px;height:32px;border-radius:50%;background:#ecfdf5;color:#059669;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;">✓</div>
+            <div style="flex:1;min-width:0;">
+              <div style="font-weight:600;color:#0f172a;font-size:13.5px;">Google 邮箱已连接</div>
+              <div style="font-size:12px;color:#6b7280;">leads@acme.io · 一收一发 · 52 封待跟进</div>
+            </div>
+            <a style="color:#4f46e5;font-size:12px;cursor:pointer;text-decoration:none;">改</a>
+          </div>
+          <div style="background:#fff;border:1px solid #eef0f4;border-radius:10px;padding:14px 16px;display:flex;gap:12px;align-items:center;">
+            <div style="width:32px;height:32px;border-radius:50%;background:#ecfdf5;color:#059669;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;">✓</div>
+            <div style="flex:1;min-width:0;">
+              <div style="font-weight:600;color:#0f172a;font-size:13.5px;">官网知识库已构建</div>
+              <div style="font-size:12px;color:#6b7280;">acme.io · 4 页 · 12 个 FAQ · 5 个集成</div>
+            </div>
+            <a style="color:#4f46e5;font-size:12px;cursor:pointer;text-decoration:none;">改</a>
+          </div>
+          <div style="background:#fff;border:1px solid #eef0f4;border-radius:10px;padding:14px 16px;display:flex;gap:12px;align-items:center;">
+            <div style="width:32px;height:32px;border-radius:50%;background:#ecfdf5;color:#059669;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;">✓</div>
+            <div style="flex:1;min-width:0;">
+              <div style="font-weight:600;color:#0f172a;font-size:13.5px;">话术手册已加载</div>
+              <div style="font-size:12px;color:#6b7280;">2 份文件 · 30 个场景</div>
+            </div>
+            <a style="color:#4f46e5;font-size:12px;cursor:pointer;text-decoration:none;">改</a>
+          </div>
+          <div style="background:#fff;border:1px solid #eef0f4;border-radius:10px;padding:14px 16px;display:flex;gap:12px;align-items:center;">
+            <div style="width:32px;height:32px;border-radius:50%;background:#ecfdf5;color:#059669;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;">✓</div>
+            <div style="flex:1;min-width:0;">
+              <div style="font-weight:600;color:#0f172a;font-size:13.5px;">试跑通过</div>
+              <div style="font-size:12px;color:#6b7280;">3 / 3 草稿已确认 · 风格匹配度 96%</div>
+            </div>
+            <a style="color:#4f46e5;font-size:12px;cursor:pointer;text-decoration:none;">重新试跑</a>
+          </div>
+        </div>
+
+        <!-- 上线规则 -->
+        <div class="form-card" style="max-width:920px;margin:0 auto 18px;">
+          <h4>🛡 上线规则确认</h4>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+            <div class="form-row" style="margin-bottom:0;">
+              <label>Agent 工作时段</label>
+              <input value="周一 - 周五 09:00 - 19:00 (UTC-7)" />
+            </div>
+            <div class="form-row" style="margin-bottom:0;">
+              <label>每日最多发送</label>
+              <input value="100 封" />
+            </div>
+            <div class="form-row" style="margin-bottom:0;">
+              <label>非工作时段邮件</label>
+              <select><option>排队至次日工作时段发送（推荐）</option><option>立即发送</option></select>
+            </div>
+            <div class="form-row" style="margin-bottom:0;">
+              <label>转人工触发关键词</label>
+              <input value="enterprise SLA, on-prem, legal, refund, complaint" />
+            </div>
+          </div>
+        </div>
+
+        <!-- 启用按钮 -->
+        <div style="max-width:920px;margin:0 auto;text-align:center;padding:8px 0 4px;">
+          <button class="btn" style="font-size:15px;padding:14px 40px;background:linear-gradient(135deg,#4f46e5,#22d3ee);box-shadow:0 10px 30px -10px rgba(79,70,229,0.5);">
+            🚀 启用 Agent · 立即开始处理 52 封邮件
+          </button>
+          <div style="margin-top:12px;font-size:12px;color:#6b7280;">
+            启用后可在「Agent 行为」随时暂停 / 调整 · 客户回复进展可在「概览」实时查看
+          </div>
         </div>
       </div>
     </div>
